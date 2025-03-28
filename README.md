@@ -142,6 +142,7 @@ This risk is accepted in the current artifact since the purpose of this artifact
 2. ast.literal_eval is a recommendation provided in lieu of eval. However, the expectation of the configuration being provided is to allow for custom configurations with yaml configurations alone without requiring any code changes to generate specific partition/sort keys and attributes with nested jsons as well. With literal_eval this solution will not be able to support jsontype datatype. 
 3. In order to restrict access to a specific DynamoDB table with a restrictive IAM policy, creation of DynamoDB table has been eliminated from datagenerator Glue job. If the DynamoDB table does not exist, the code will throw an error message. 
 
+
 ### Troubleshooting:
 1. If you encounter error "pyspark.sql.utils.IllegalArgumentException: Can not create a Path from an empty string", please ensure you have a location specified for the database. Refer https://docs.aws.amazon.com/athena/latest/ug/notebooks-spark-known-issues.html#notebooks-spark-known-issues-illegal-argument-exception for further details.
 ![Glue location settings](UpdateGlueDatabaseToHaveLocation.png)
