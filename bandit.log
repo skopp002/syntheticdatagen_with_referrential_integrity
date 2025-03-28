@@ -1,0 +1,80 @@
+Run started:2024-10-18 22:03:20.235676
+
+Test results:
+>> Issue: [B307:blacklist] Use of possibly insecure function - consider using safer ast.literal_eval.
+   Severity: Medium   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.10/blacklists/blacklist_calls.html#b307-eval
+   Location: ./src/generators/dynamodb_generator.py:48:47
+47	                                        in_place = True, \
+48	                                        value= eval(jsonval))
+49	    row[key_of_attr] = json.dumps(json_data)
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.10/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./src/generators/dynamodb_generator.py:65:28
+64	    match config_file['SK']['type']:
+65	        case 'conf': return f"""select {config_file['SQL']} as PK,
+66	                          {config_file['SK']['val']} as SK,
+67	                          {additional_pk} as ADDITIONAL_PK
+68	                          from keytable"""
+69	        #Here we generate a range of SKs for the same PK by creating a sequence and then exploding it into multiple rows                  
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.10/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./src/generators/dynamodb_generator.py:70:23
+69	        #Here we generate a range of SKs for the same PK by creating a sequence and then exploding it into multiple rows                  
+70	        case _: return f"""select PK, FROM_UNIXTIME(UNIX_TIMESTAMP(SKdefault, 'yyyy-MM-dd HH:mm:ss'), {config_file['SK']['format']}) as SK,
+71	                           ADDITIONAL_PK from 
+72	                           (select {config_file['SQL']} as PK,
+73	                           {additional_pk} as ADDITIONAL_PK,
+74	                           explode(sequence(TO_TIMESTAMP({config_file['SK']['start']}),
+75	                           TO_TIMESTAMP({config_file['SK']['end']}),
+76	                           interval {config_file['SK']['interval_in_days']} day)) as SKdefault from keytable)"""                  
+77	
+
+--------------------------------------------------
+>> Issue: [B307:blacklist] Use of possibly insecure function - consider using safer ast.literal_eval.
+   Severity: Medium   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.10/blacklists/blacklist_calls.html#b307-eval
+   Location: ./src/generators/dynamodb_generator.py:94:40
+93	                dynpk_sk = dynpk_sk.withColumn(attr,
+94	                F.date_format(F.to_date(eval(config_file[attr]["val"]), config_file[attr]['format']
+95	                ),config_file[attr]['format']))
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.10/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./src/generators/dynamodb_generator.py:110:37
+109	                dynpk_sk.createOrReplaceTempView("pksktbl")
+110	                dynpk_sk = spark.sql(f"select *, {config_file[attr]['attr_SQL']} as {attr} from pksktbl")    
+111	    return dynpk_sk
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 540
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 0
+		Medium: 5
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 3
+		Medium: 0
+		High: 2
+Files skipped (0):

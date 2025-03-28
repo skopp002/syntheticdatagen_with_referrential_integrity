@@ -1,0 +1,101 @@
+settings:
+    appname: "datagenerator"
+    version: 1
+    secretname : "aws secretname for the DB if RDS"
+    secretregion : ""
+    keyfilepath: "datageneratorkeys"
+    schemapath: "generatorConfig/schema/"
+    s3bucket: "synthetic-datagen-354050063238-us-east-1-apg"
+
+table_list: ['department', 'employee', 'company', 'trainings']
+
+datasink: 'athena' #Options 'athena', 'rds'. If rds is provided, secrets need to be made available and connectivity needs to be ensured between glue job and RDS instance
+
+num_partitions: 8
+
+deptlist: &deptlist ['it','hr','datacenter','sales']
+emplevellist: &emplevellist ['L1', 'L2', 'L3', 'L4', 'L5']
+trainings: &trainings ['ethics', 'security']
+
+basemap:
+    empid:
+       minVal: 10000
+       maxVal: 20000
+       step: 1
+    deptid: &deptid
+       minVal: 4000
+       maxVal: 5000
+       step: 1
+       baseCol: empid #Ensures department_Id is always the same for given employee
+    companyid: &companyid
+       minVal: 1000
+       maxVal: 2000
+       step: 1
+       baseCol: deptid 
+
+
+keymap:
+    employee_id: &employee_id
+        minVal: 100000
+        maxVal: 200000
+        step: 1
+        baseCol: empid
+        prefix: 'X'
+    employee_number: *employee_id
+    department_id: *deptid
+    company_id: *companyid
+    dept_id: *deptid
+    costcenter:
+       minVal: 1000
+       maxVal: 2000
+       step: 1
+       baseCol: deptid
+    training_id:
+        minVal: 100
+        maxVal: 200
+        step: 1
+        baseCol: deptid
+    dept_start_date:
+        datatype: 'confdate'
+        val: '2022-10-24'    
+    employee_level:
+       datatype: 'faker'
+       fakerText: 'word'
+       options: *emplevellist
+       baseCol: employee_id  
+    manager_id:
+        minVal: 100000
+        maxVal: 200000
+        step: 1
+        baseCol: employee_id
+        prefix: 'X'
+    employment_start_dt:
+        datatype: date
+        genType: deltaDays
+        deltaDays: 10
+        baseCol: company_start_dt
+    company_ipo_dt:   #100 days from current date. This is just to demonstrate relative date computation 
+        datatype: date
+        genType: deltaDays
+        deltaDays: 100
+    training_name:
+       datatype: 'faker'
+       fakerText: 'word'
+       options: *trainings
+       baseCol: training_id   
+    
+    #Faker based ids are not consistent so use them only for fields where referrential integrity is not needed.    
+    # employee_name: 
+    #     datatype: 'faker'
+    #     fakerText: 'name'
+    # employee_email:
+    #     datatype: 'faker'
+    #     fakerText: 'email'
+    # employee_address:
+    #     datatype: 'faker'
+    #     fakerText: 'address'    
+    # dept_name:
+    #    datatype: 'faker'
+    #    fakerText: 'word'
+    #    options: *deptlist
+    #    baseCol: deptid 

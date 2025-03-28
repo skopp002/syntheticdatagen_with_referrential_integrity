@@ -1,0 +1,35 @@
+PKlst: ['PK1']
+
+PKdesc:
+    PK1:
+      # This will generate PK with X-<10 chars employee_id>-<10 chars department_id>
+        SQL: "LPAD(concat_ws('-', LPAD(employee_id,10,0), LPAD(department_id,10,0)),22,'X-')"
+        ADDITIONAL_SQL: "LPAD(concat_ws('-', LPAD(costcenter,10,0), LPAD(department_id,10,0)),22,'X-')"
+        SK: 
+           type: daterange
+           start: TO_TIMESTAMP(date_sub(current_timestamp(), 91))
+           end: current_timestamp()
+           format: "'yyyy-MM-dd HH:mm:ss'"
+           interval_in_days: 1
+        Attrs: ['attr1', 'create_time', 'expTm','sqltypeattr']
+        attr1:
+            type: 'json'
+            jsonstr: '{"employee_id": "E001","dept_id": "D100","status_update": ""}'
+            replacement_map:
+                employee_id: row['PK'].split('-')[0]
+                dept_id: row['PK'].split('-')[1]
+                status_update: row['ADDITIONAL_PK'].split('-')[0]
+        create_time:
+            type: audit_date
+            val: 'F.current_timestamp()'
+            format: "yyyy-MM-dd HH:mm:ss" #"'yyyy-MM-dd HH:mm:ss'" #
+        expTm:
+            type: relative_date
+            base_date_column: create_time
+            base_date_format: "yyyy-MM-dd HH:mm:ss" #'yyyyMMddHHmmsssss'
+            delta_days: 100
+            # Use this if required to change format: "yyyy-MM-dd HH:mm:ss". Not code needs to be updated to use F.date_format instead of F.unix_timestamp()
+        sqltypeattr:
+            type: 'sql'
+            attr_SQL: "SPLIT(PK,'-')[0]" #Note here we are dealing with dataframe not individual row. Hence syntax is different
+ 
