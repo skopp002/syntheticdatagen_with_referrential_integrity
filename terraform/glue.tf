@@ -1,12 +1,12 @@
 //Create AWS Glue Database 
 resource "aws_glue_catalog_database" "aws_glue_catalog_database" {
   name = var.glue_database
-  location_uri = "s3://${aws_s3_bucket.s3_datagen.id}/aws-glue-apg/"
+  location_uri = "s3://${aws_s3_bucket.s3_datagen.id}/aws-glue/"
 }
 
 
-resource "aws_glue_job" "datagenerator_apg" {
-    name     = "datagenerator_apg.py"
+resource "aws_glue_job" "datagenerator" {
+    name     = "datagenerator.py"
     role_arn = aws_iam_role.glue_connection_role.arn
     glue_version = "4.0"
     worker_type  = "G.1X"
@@ -30,7 +30,7 @@ resource "aws_glue_job" "datagenerator_apg" {
     "--appname" = "remotegenerator"
     "--config_bucket" = "${aws_s3_bucket.s3_datagen.id}"
     "--config_file" = "generatorConfig/datagenerator_config.yaml"
-    "--dbschema" = "syntheticdataapg"
+    "--dbschema" = "syntheticdata"
     "--rowcount" =  10000
     "--secretname" ="' '"
     "--secretregion" = "''"
@@ -41,8 +41,8 @@ resource "aws_glue_job" "datagenerator_apg" {
 }
 
 
-resource "aws_glue_job" "dynamodb_generator_apg" {
-    name     = "dynamodb_generator_apg.py"
+resource "aws_glue_job" "dynamodb_generator" {
+    name     = "dynamodb_generator.py"
     role_arn = aws_iam_role.glue_connection_role.arn
     glue_version = "4.0"
     worker_type  = "G.1X"

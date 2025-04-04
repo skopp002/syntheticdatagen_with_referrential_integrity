@@ -3,7 +3,7 @@ module "vpc" {
   source  = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=e226cc15a7b8f62fd0e108792fea66fa85bcb4b9" ##commit hash for v5.13.0
   # source = "terraform-aws-modules/vpc/aws"
   # version = "5.13.0"
-  name = "aws-apg-vpc"
+  name = "aws-vpc"
 
   cidr = "10.0.0.0/16"
   azs  = slice(element(data.aws_availability_zones.available.*.names,count.index), 0, 3)

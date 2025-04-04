@@ -10,7 +10,7 @@ output "rds_endpoint" {
     value = aws_db_instance.postgresql.*.endpoint
 }
 
-output "apg_public_key" {
+output "syn_public_key" {
     value = file(var.public_key)
 }
 

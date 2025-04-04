@@ -1,5 +1,5 @@
-resource "aws_key_pair" "apg_key" {
-  key_name   = "apg_public_key"
+resource "aws_key_pair" "syn_key" {
+  key_name   = "syn_public_key"
   public_key = file(var.public_key)
 }
 
@@ -35,7 +35,7 @@ resource "aws_security_group_rule" "outgoing_https" {
 
 resource "aws_security_group" "ec2_pgsql_sg" {
   count = var.enable_rds ? 1: 0
-  name        = "apg-ec2-sg"
+  name        = "ec2-sg"
   description = "Security Group for EC2 pgsql"
   vpc_id = element(module.vpc.*.vpc_id,count.index)
 }
@@ -44,7 +44,7 @@ resource "aws_instance" "ec2_psql" {
   count = var.enable_rds ? 1: 0
   ami           = "ami-0ebfd941bbafe70c6"
   instance_type = "t3.small"
-  key_name = aws_key_pair.apg_key.key_name
+  key_name = aws_key_pair.syn_key.key_name
   subnet_id = element(module.vpc.*.public_subnets[0],count.index)
   associate_public_ip_address = true
   tags = {

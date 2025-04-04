@@ -1,5 +1,5 @@
 variable "pgdb_username" {
-  default = "rds_user_apg"
+  default = "rds_user"
 }
 
 variable "pgdb_database_name" {
@@ -7,35 +7,31 @@ variable "pgdb_database_name" {
 }
 
 variable "pgdb_identifier" {
-  default = "demo-rds-apg"
+  default = "demo-rds"
 }
 variable "dynamodb_table_name" {
-  default = "employee_department_interactions_apg"
+  default = "employee_department_interactions"
 }
 
 variable "glue_database" {
-  default = "syntheticdataapg_db"
+  default = "syntheticdata_db"
 }
 
 variable "private_key" {
   description = "Path to the private key"
-  default = "/Users/aaneja/.ssh/aaneja_apg"
+  default = "<>"
 }
 
 variable "public_key" {
   description = "Path to the public key"
-  default = "/Users/aaneja/.ssh/aaneja_apg.pub"
+  default = "<>"
 }
 
 variable "inbound_ssh_connection_cidr" {
   type = list
-  default = ["45.17.187.96/32"]
+  default = ["<Specify your router IP>"]
 }
 
-variable "sql_file_path" {
-  type = string
-  default = "sqls/weather_table.sql"
-}
 
 variable "enable_rds" {
   default = false

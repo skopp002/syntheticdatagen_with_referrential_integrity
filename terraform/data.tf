@@ -10,7 +10,7 @@ data "aws_availability_zones" "available" {
 
 data "aws_secretsmanager_secret" "db_password" {
   count = var.enable_rds ? 1: 0
-  name = "apg2-rds-primary-cluster-password"
+  name = "rds-primary-cluster-password"
   depends_on = [ aws_secretsmanager_secret_version.password ]
 }
 

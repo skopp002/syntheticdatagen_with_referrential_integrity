@@ -136,9 +136,8 @@ The Datagenerator job needs to be executed first. If the requirement is only dyn
 ![Dynamodb Amplification](DynamoDBAmplifiedRecords.png)
 
 
-## Appsec Review Mitigation/Explanation
-1. SQL Injection risk was flagged in AppSec review. Refer ![bandit.log](bandit.log) for details.
-This risk is accepted in the current artifact since the purpose of this artifact is to produce synthetic data and the expectation is that the code would be used in non-production environments to quickly prototype and test applications. 
+## Security Best Practices Implemented
+1. SQL Injection - This risk is accepted in the current artifact since the purpose of this artifact is to produce synthetic data and the expectation is that the code would be used in non-production environments to quickly prototype and test applications. 
 2. ast.literal_eval is a recommendation provided in lieu of eval. However, the expectation of the configuration being provided is to allow for custom configurations with yaml configurations alone without requiring any code changes to generate specific partition/sort keys and attributes with nested jsons as well. With literal_eval this solution will not be able to support jsontype datatype. 
 3. In order to restrict access to a specific DynamoDB table with a restrictive IAM policy, creation of DynamoDB table has been eliminated from datagenerator Glue job. If the DynamoDB table does not exist, the code will throw an error message. 
 

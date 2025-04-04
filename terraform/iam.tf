@@ -1,6 +1,6 @@
 # Create the IAM role for Glue to RDS connection
 resource "aws_iam_role" "glue_connection_role" {
-  name = "glue_connection_role_apg"
+  name = "glue_connection_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

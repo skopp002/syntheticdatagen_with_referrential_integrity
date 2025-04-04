@@ -20,6 +20,6 @@ module "dynamodb_table" {
   billing_mode                  = "PAY_PER_REQUEST"
   tags = {
     Terraform   = "true"
-    Environment = "Example-APG"
+    Environment = "Example"
   }
 }
