@@ -5,7 +5,7 @@ settings:
     secretregion : ""
     keyfilepath: "datageneratorkeys"
     schemapath: "generatorConfig/schema/"
-    s3bucket: "synthetic-datagen-354050063238-us-east-1-apg"
+    s3bucket: "synthetic-datagen-354050063238-us-east-1"
 
 table_list: ['department', 'employee', 'company', 'trainings']
 

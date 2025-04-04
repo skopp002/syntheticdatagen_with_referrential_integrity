@@ -99,7 +99,7 @@ If you wish to generate synthetic data for RDS, you can execute terraform in thi
 
 User are expected to 
 
-1. Place the Data Definition (DDL) of there tables in `terraform/sql` in a single file with an `.sql` extension. An example `terraform/sql/weather.sql` file is provided as an example.
+1. Place the Data Definition (DDL) of there tables in `terraform/sql` in a single file with an `.sql` extension. 
 2. Update the `inbound_ssh_connection_cidr` variable in `variables.tf`to provide the public IP address of the machine from where the terraform code is run
 3. Update the `sql_file_path` variable in `variables.tf` to point to the user created SQL file
 
@@ -123,10 +123,47 @@ To destroy the provisioning infrastructure:
 
 1. Once terraform pipeline executes successfully, ensure the glue jobs, libraries, schema for athena/RDS tables and the configurations for datagenerator and dynamodb_amplifier are available. Verify the paths correspond to the paths specified in runtime arguments of the glue jobs. For Athena as datasink, you do not need to create tables, Glue will create tables specified in the config, however database creation is needed. The terraform code will create the database. Ensure the database schema is created and has location set up. Without this you may encounter the error below (Troubleshooting:1)
 
-2. Execute datagenerator_apg glue job. This should generate specified number of rows for all the tables specified in the yaml file. 
+2. Execute datagenerator glue job. This should generate specified number of rows for all the tables specified in the yaml file. 
 The Datagenerator job needs to be executed first. If the requirement is only dynamodb amplification, you can generate a keypathfile manually and provide as input to dynamodb_amplifier job.  
 
-3. Dynamodb amplification requires a different approach since load testing for dynamodb would entail multiple items with same primary key and varying sort key. The solution takes this into account and supports multiple ways to define a primary key, sort key and various other attributes which are part of the items. If only dynamodb amplification is desired, a sample keypathfile can be provided.
+3. Dynamodb amplification requires a different approach since load testing for dynamodb would entail multiple items with same primary key and varying sort key. The solution takes this into account and supports multiple ways to define a primary key, sort key and various other attributes which are part of the items. If only dynamodb amplification is desired, a sample keypathfile can be provided. The config file specifies patterns for Partition Key and Sort Key settings for Amazon DynamoDB table generation. It is recommended to create Amazon DynamoDB table through Terraform itself. However, there is a provision to create Amazon Dynamodb Table through Glue job. This code block has been commented to avoid security risk. 
+
+    NOTE: If Amazon DynamoDB table is created through AWS Glue job, the table would not be automatically deleted. If it is created through Terraform, the table will automatically be deleted upon terraform destroy.
+
+    The Partition Key by default is based on format "LPAD(concat_ws('-', LPAD(employee_id,10,0), LPAD(department_id,10,0)),22,'X-')" as default. This will generate Partition Key of a format X000X118122-0000004104  This behavior can be changed by adjusting the SQL for Partition Key definition. 
+
+    ADDITIONAL_SQL is pulled in to refer to any other generated column from data generation field if it is needed as a part of any keys or attributes being generated.
+
+    The Amazon DynamoDB amplification is based on the fact that in most scenarios customers start out with some base tables in Amazon RDS or Amazon Athena. If for your scenario only Amazon DynamoDB amplification is required, this can be done by providing a sample keyfilepath file which Amazon DynamoDB amplification job needs as input. 
+
+    Typical datatype for values in Amazon DynamoDB  item attribute fields are jsons. For example, consider a user item as below
+
+        {
+            'user_id': 'U12345678',
+            'username': 'techsavvy_shopper',
+            'email': 'shopper@example.com',
+            'account_created': '2023-03-15T14:30:00Z',
+            'last_login': '2023-06-20T09:45:32Z',
+            'is_premium_member': True,
+            'total_purchases': Decimal('1289.99'),
+            'profile': {
+                'first_name': 'Alex',
+                'last_name': 'Johnson',
+                'age': 28,
+                'location': {
+                    'city': 'Seattle',
+                    'state': 'WA',
+                    'country': 'USA'
+                }
+        }
+
+        Here “profile” is an attribute which is a json by itself. In such scenarios we may want to amplify the Amazon DynamoDB records with appropriate values for all these nested json values too.
+
+        The “type" setting in configuration can be used to customize how contents of such jsons can be updated for every generated record. The replacement map pulls in values from data generator and replaces elements of a sample json provided with the values from the generated data.
+
+        When dealing with row[‘PK’] we are referring to already generated Partition Key or Sort Key values and using components from it to adjust values of attributes. For instance, assume the profile{} attribute has an additional json key user_id, in order to make the user_id available within the json structure of profile, row[‘PK’] can be used. 
+
+        sqltypeattr is used to provide any additional SQL based values independent of already generated values as a part of Partition or Sort keys.
 
 4. If dynamodb table already exists, provide it as runtime argument and it should be able to write into provided table. If not, the glue job will generate a new table as defined within the code. To avoid throttling issues, on-demand table will be created as a default. If this needs to be changed, ensure provisioned capacity is inline with expected volume.
 
